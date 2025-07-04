@@ -1,0 +1,377 @@
+/* style.css */
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Evita el scroll en el cuerpo */
+  background-color: #f0f8ff; /* Azul claro para un toque alegre */
+  color: #333;
+  /* Forzar la altura al 100% del viewport para móviles */
+  height: 100vh;
+  width: 100vw;
+  /* Bloquear la orientación si es posible (no siempre funciona en todos los navegadores/dispositivos) */
+  /* Esto es más una directiva, la implementación real depende del SO/navegador */
+  /* html { height: 100%; } body { height: 100%; } */
+}
+
+/* --- Pantalla de Selección de Ciudad --- */
+.full-screen-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* Ocupa toda la altura del viewport */
+  width: 100vw; /* Ocupa todo el ancho del viewport */
+  background-color: #e0f7fa; /* Un azul claro muy suave */
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.full-screen-container h1 {
+  font-size: 2.8em; /* Más grande para móviles */
+  color: #00796b; /* Un verde azulado oscuro */
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+#city-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* Más espacio entre botones */
+  width: 90%;
+  max-width: 450px; /* Ancho máximo para la lista de ciudades */
+}
+
+.city-button {
+  background-color: #26a69a; /* Verde azulado */
+  color: white;
+  padding: 18px 25px; /* Más padding */
+  border: none;
+  border-radius: 12px; /* Más redondeado */
+  font-size: 1.6em; /* Botones más grandes */
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.25); /* Sombra más pronunciada */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.city-button:hover {
+  background-color: #00897b;
+  transform: translateY(-2px);
+}
+
+.city-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+/* --- Header y Botón de Volver --- */
+.header {
+  background-color: #ff6347; /* Naranja vibrante */
+  color: white;
+  padding: 15px 10px;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  position: relative;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 10px; /* Ajuste para el botón */
+  padding-right: 10px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2.2em; /* Más grande */
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  flex-grow: 1;
+  text-align: center;
+  padding-left: 40px; /* Offset para el botón de volver */
+}
+
+#current-city-title {
+  font-size: 2.2em; /* Más grande */
+  margin: 0;
+}
+
+.header-button {
+  background-color: rgba(255,255,255,0.2);
+  color: white;
+  border: none;
+  border-radius: 8px; /* Más redondeado */
+  padding: 10px 15px; /* Más padding */
+  font-size: 1.4em; /* Más grande */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+.header-button:hover {
+  background-color: rgba(255,255,255,0.3);
+}
+
+.filter-container {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Más espacio */
+}
+
+.filter-container label {
+  font-size: 1.3em; /* Más grande */
+}
+
+#category-filter {
+  padding: 10px; /* Más padding */
+  border-radius: 8px; /* Más redondeado */
+  border: none;
+  background-color: rgba(255,255,255,0.8);
+  color: #333;
+  font-size: 1.3em; /* Más grande */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+#map {
+  height: calc(100vh - 100px); /* Ajusta la altura del mapa dinámicamente */
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+/* Estilos para los popups de Leaflet */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px; /* Más redondeado */
+  background-color: #fff;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.4); /* Sombra más pronunciada */
+  padding: 25px; /* Más padding */
+}
+
+.leaflet-popup-content h3 {
+  color: #4682b4;
+  margin-top: 0;
+  margin-bottom: 10px; /* Más espacio */
+  font-size: 1.8em; /* Más grande */
+}
+
+.leaflet-popup-content p {
+  margin: 0 0 10px 0; /* Más espacio */
+  font-size: 1.3em; /* Más grande */
+  line-height: 1.6;
+}
+
+.leaflet-popup-content strong {
+  color: #555;
+}
+
+.popup-edit-button, .popup-delete-button {
+  display: inline-block;
+  padding: 12px 18px; /* Más padding */
+  margin-top: 20px; /* Más margen superior */
+  margin-right: 12px;
+  border: none;
+  border-radius: 10px; /* Más redondeado */
+  cursor: pointer;
+  font-size: 1.2em; /* Más grande */
+  transition: background-color 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+}
+
+.popup-edit-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.popup-edit-button:hover {
+  background-color: #45a049;
+}
+
+.popup-delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.popup-delete-button:hover {
+  background-color: #da190b;
+}
+
+/* Modal Styles - ¡A PANTALLA COMPLETA! */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100vw; /* Ocupa todo el ancho del viewport */
+  height: 100vh; /* Ocupa toda la altura del viewport */
+  background-color: rgba(0,0,0,0.8); /* Fondo más oscuro */
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* Elimina padding para que el contenido se estire */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  width: 100vw; /* Ocupa todo el ancho del viewport */
+  height: 100vh; /* Ocupa toda la altura del viewport */
+  padding: 30px 20px; /* Padding interno para el contenido */
+  border-radius: 0; /* Sin bordes redondeados para pantalla completa */
+  box-shadow: none; /* Sin sombra para pantalla completa */
+  position: relative;
+  overflow-y: auto; /* Permite scroll si el contenido es demasiado largo */
+  animation: fadeIn 0.3s ease-out;
+  box-sizing: border-box; /* Incluye padding en el width/height */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.close-button {
+  color: #aaa;
+  position: absolute; /* Posición absoluta para la X */
+  top: 15px;
+  right: 20px;
+  font-size: 36px; /* Más grande */
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 2001; /* Asegura que esté por encima del contenido del modal */
+}
+
+.close-button:hover,
+.close-button:focus {
+  color: black;
+  text-decoration: none;
+}
+
+.modal-content h2 {
+  color: #ff6347;
+  text-align: center;
+  margin-bottom: 30px; /* Más espacio */
+  font-size: 2.5em; /* Más grande */
+}
+
+#point-form label {
+  display: block;
+  margin-bottom: 10px; /* Más espacio */
+  font-weight: bold;
+  color: #555;
+  font-size: 1.2em; /* Más grande */
+}
+
+#point-form input[type="text"],
+#point-form select,
+#point-form textarea {
+  width: calc(100% - 20px); /* Ajusta para padding */
+  padding: 15px; /* Más padding */
+  margin-bottom: 25px; /* Más margen inferior */
+  border: 1px solid #ccc;
+  border-radius: 10px; /* Más redondeado */
+  box-sizing: border-box;
+  font-size: 1.2em; /* Más grande */
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.15);
+}
+
+#point-form textarea {
+  resize: vertical;
+  min-height: 120px; /* Más altura mínima */
+}
+
+#point-form button {
+  background-color: #4682b4;
+  color: white;
+  padding: 18px 25px; /* Más padding */
+  border: none;
+  border-radius: 12px; /* Más redondeado */
+  cursor: pointer;
+  font-size: 1.5em; /* Más grande */
+  margin-top: 30px; /* Más margen superior */
+  width: 100%;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.25);
+}
+
+#point-form button:hover {
+  background-color: #3a6b99;
+  transform: translateY(-2px);
+}
+#point-form button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Custom Maps-like Marker Icons */
+.custom-maps-like-icon {
+  background-color: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  font-size: 1.3em; /* ¡AÚN MÁS GRANDE para el nombre en el marcador! */
+  font-weight: bold;
+  color: #333;
+  text-shadow: 1px 1px 3px rgba(255,255,255,0.8); /* Sombra más pronunciada para legibilidad */
+  /* iconSize y iconAnchor en JS controlan el tamaño total y el punto de anclaje */
+}
+
+.map-pin-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  left: 0px; 
+  top: 0px; 
+}
+
+.map-pin {
+  width: 30px; /* Ancho de la base del pin (aún más grande) */
+  height: 30px; /* Altura de la base del pin (aún más grande) */
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.6); /* Sombra más intensa */
+  border: 2px solid white;
+  margin-right: 10px; /* Espacio entre el pin y el nombre */
+  flex-shrink: 0;
+}
+
+.map-pin-label {
+  padding: 6px 10px; /* Más padding */
+  background-color: rgba(255,255,255,0.98); /* Fondo casi opaco para el texto */
+  border-radius: 10px; /* Más redondeado */
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.3);
+  margin-left: -15px; /* Mueve el label un poco más a la izquierda para solaparse */
+}
+
+/* Ocultar los controles de zoom por defecto de Leaflet, ya que añadimos uno personalizado */
+.leaflet-control-zoom {
+  display: none !important;
+}
+
+/* Ocultar el control de atribución por defecto en móvil para una interfaz más limpia */
+@media (max-width: 768px) {
+  .leaflet-control-attribution {
+    display: none !important;
+  }
+  .header h1 {
+    font-size: 1.8em; /* Ajuste para móviles */
+    padding-left: 0;
+  }
+  .header-button {
+    font-size: 1.1em;
+    padding: 8px 12px;
+  }
+  .filter-container label {
+    font-size: 1.1em;
+  }
+  #category-filter {
+    font-size: 1.1em;
+  }
+  /* Asegurar que el modal ocupe toda la pantalla en móvil */
+  .modal-content {
+    width: 100vw;
+    height: 100vh;
+    padding: 20px; /* Ajuste de padding para móviles */
+  }
+}

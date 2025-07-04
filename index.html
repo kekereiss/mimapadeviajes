@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mi Mapa de Viajes</title>
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""/>
+  
+  <style>
+    <?!= include('style'); ?>
+  </style>
+
+</head>
+<body>
+  <div id="city-selection-screen" class="full-screen-container">
+    <h1>Elige tu Destino</h1>
+    <div id="city-list-container">
+      </div>
+  </div>
+
+  <div id="app-container" style="display: none;"> 
+    <div class="header">
+      <button id="back-to-cities-btn" class="header-button">← Ciudades</button>
+      <h1 id="current-city-title"></h1>
+      <div class="filter-container">
+        <label for="category-filter">Filtrar:</label>
+        <select id="category-filter">
+          <option value="all">Todas</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="point-form-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Añadir/Editar Punto de Interés</h2>
+        <form id="point-form">
+          <label for="form-ciudad">Ciudad:</label>
+          <input type="text" id="form-ciudad" name="Ciudad" readonly><br> <label for="form-nombre">Nombre:</label>
+          <input type="text" id="form-nombre" name="Nombre" required><br>
+
+          <label for="form-direccion">Dirección:</label>
+          <input type="text" id="form-direccion" name="Dirección"><br>
+
+          <label for="form-categoria">Categoría:</label>
+          <select id="form-categoria" name="Categoría" required>
+            <option value="">Selecciona una categoría</option>
+            <option value="Turismo">Turismo</option>
+            <option value="Restaurantes">Restaurantes</option>
+            <option value="Tiendas">Tiendas</option>
+            <option value="Transporte">Transporte</option>
+            <option value="Alojamiento">Alojamiento</option>
+            <option value="Ocio">Ocio</option>
+            <option value="Otros">Otros</option>
+          </select><br>
+
+          <label for="form-horario">Horario:</label>
+          <input type="text" id="form-horario" name="Horario"><br>
+
+          <label for="form-descripcion">Descripción:</label>
+          <textarea id="form-descripcion" name="Descripción"></textarea><br>
+
+          <label for="form-latitud">Latitud:</label>
+          <input type="text" id="form-latitud" name="Latitud" readonly><br>
+
+          <label for="form-longitud">Longitud:</label>
+          <input type="text" id="form-longitud" name="Longitud" readonly><br>
+
+          <button type="submit" id="save-point-btn">Guardar Punto</button>
+          <button type="button" id="delete-point-btn" style="background-color: #f44336; display: none;">Eliminar Punto</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""></script>
+  
+  <script src="script.js"></script>
+
+</body>
+</html>
