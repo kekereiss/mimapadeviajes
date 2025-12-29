@@ -1,86 +1,560 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <base target="_top">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Mi Mapa de Viajes</title>
-  
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    crossorigin=""/>
-  
-  <style>
-    <?!= include('style'); ?>
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Mapa de Viajes</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #FF6B6B; /* Coral alegre */
+            --secondary: #4ECDC4; /* Turquesa moderno */
+            --dark: #2C3E50;
+            --light: #F7F9FC;
+            --accent: #FFE66D; /* Amarillo sol */
+            --shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
 
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; overflow: hidden; }
+
+        /* Mapa a pantalla completa */
+        #map { width: 100%; height: 100vh; z-index: 1; }
+
+        /* Controles flotantes (Filtros y GPS) */
+        .controls-container {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
+        }
+
+        .filter-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        select {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--dark);
+            outline: none;
+            width: 100%;
+        }
+
+        /* Botón GPS */
+        .gps-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 1000; /* Para que esté por encima del mapa */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3388ff;
+    transition: all 0.3s ease;
+}
+
+.gps-btn:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.1);
+}
+
+.gps-btn svg {
+    width: 28px;
+    height: 28px;
+}
+        .gps-btn:active { transform: scale(0.9); }
+
+        /* Modal (Formulario) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 25px;
+            width: 85%;
+            max-width: 350px;
+            box-shadow: var(--shadow);
+            position: relative;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 { margin-top: 0; color: var(--primary); font-size: 1.2rem; }
+        
+        input, textarea, select.form-select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            transition: border 0.3s;
+        }
+        
+        input:focus, textarea:focus { border-color: var(--secondary); outline: none; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn-save { background: var(--secondary); color: white; }
+        .btn-cancel { background: #eee; color: var(--dark); }
+        .btn-delete { background: var(--primary); color: white; margin-top: 10px; width: 100%; }
+        
+        /* Personalización de marcadores */
+        .custom-marker {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            font-weight: bold;
+        }
+        
+        /* Loader */
+        .loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: white;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.5s;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        @media (max-width: 600px) {
+    .controls-container {
+        top: 10px;
+        width: 95%;
+    }
+    .filter-box {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    .gps-btn {
+        bottom: 20px;
+        right: 15px;
+        width: 45px;
+        height: 45px;
+    }
+}
+    </style>
 </head>
 <body>
-  <div id="city-selection-screen" class="full-screen-container">
-    <h1>Elige tu Destino</h1>
-    <div id="city-list-container">
-      </div>
-  </div>
 
-  <div id="app-container" style="display: none;"> 
-    <div class="header">
-      <button id="back-to-cities-btn" class="header-button">← Ciudades</button>
-      <h1 id="current-city-title"></h1>
-      <div class="filter-container">
-        <label for="category-filter">Filtrar:</label>
-        <select id="category-filter">
-          <option value="all">Todas</option>
-        </select>
-      </div>
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; color: var(--dark)">Cargando tu viaje...</p>
     </div>
 
-    <div id="map"></div>
-
-    <div id="point-form-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-button">&times;</span>
-        <h2>Añadir/Editar Punto de Interés</h2>
-        <form id="point-form">
-          <label for="form-ciudad">Ciudad:</label>
-          <input type="text" id="form-ciudad" name="Ciudad" readonly><br> <label for="form-nombre">Nombre:</label>
-          <input type="text" id="form-nombre" name="Nombre" required><br>
-
-          <label for="form-direccion">Dirección:</label>
-          <input type="text" id="form-direccion" name="Dirección"><br>
-
-          <label for="form-categoria">Categoría:</label>
-          <select id="form-categoria" name="Categoría" required>
-            <option value="">Selecciona una categoría</option>
-            <option value="Turismo">Turismo</option>
-            <option value="Restaurantes">Restaurantes</option>
-            <option value="Tiendas">Tiendas</option>
-            <option value="Transporte">Transporte</option>
-            <option value="Alojamiento">Alojamiento</option>
-            <option value="Ocio">Ocio</option>
-            <option value="Otros">Otros</option>
-          </select><br>
-
-          <label for="form-horario">Horario:</label>
-          <input type="text" id="form-horario" name="Horario"><br>
-
-          <label for="form-descripcion">Descripción:</label>
-          <textarea id="form-descripcion" name="Descripción"></textarea><br>
-
-          <label for="form-latitud">Latitud:</label>
-          <input type="text" id="form-latitud" name="Latitud" readonly><br>
-
-          <label for="form-longitud">Longitud:</label>
-          <input type="text" id="form-longitud" name="Longitud" readonly><br>
-
-          <button type="submit" id="save-point-btn">Guardar Punto</button>
-          <button type="button" id="delete-point-btn" style="background-color: #f44336; display: none;">Eliminar Punto</button>
-        </form>
-      </div>
+    <div class="controls-container">
+        <div class="filter-box">
+            <select id="cityFilter">
+                <option value="all">🌍 Todas las ciudades</option>
+            </select>
+        </div>
+        <div class="filter-box">
+            <select id="catFilter">
+                <option value="all">🏷️ Todas las categorías</option>
+                <option value="Comida">🍔 Comida</option>
+                <option value="Turismo">📸 Turismo</option>
+                <option value="Ocio">🍹 Ocio</option>
+                <option value="Alojamiento">🛏️ Alojamiento</option>
+                <option value="Otro">📌 Otro</option>
+            </select>
+        </div>
     </div>
-  </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    crossorigin=""></script>
-  
-  <script src="script.js"></script>
+    <div id="map"></div> <button class="gps-btn" onclick="locateUser()" title="Mi ubicación">
+    <svg viewBox="0 0 24 24" width="24" height="24">
+        <path fill="currentColor" d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M3.05,13H1V11H3.05C3.5,6.83 6.83,3.5 11,3.05V1H13V3.05C17.17,3.5 20.5,6.83 20.95,11H23V13H20.95C20.5,17.17 17.17,20.5 13,20.95V23H11V20.95C6.83,20.5 3.5,17.17 3.05,13Z" />
+    </svg>
+</button>
 
+    <div id="poiModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Nuevo Punto</h2>
+            <form id="poiForm">
+                <input type="hidden" id="poiId">
+                <input type="hidden" id="poiLat">
+                <input type="hidden" id="poiLng">
+                
+                <input type="text" id="poiName" placeholder="Nombre del lugar" required>
+                <textarea id="poiDesc" placeholder="Descripción breve" rows="3"></textarea>
+                
+                <select id="poiCat" class="form-select" required>
+                    <option value="Comida">🍔 Comida</option>
+                    <option value="Turismo">📸 Turismo</option>
+                    <option value="Ocio">🍹 Ocio</option>
+                    <option value="Alojamiento">🛏️ Alojamiento</option>
+                    <option value="Otro">📌 Otro</option>
+                </select>
+
+                <input type="text" id="poiCity" placeholder="Ciudad" required>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn-save" id="saveBtn">Guardar</button>
+                </div>
+                <button type="button" class="btn-delete" id="deleteBtn" style="display:none;" onclick="deletePoint()">Eliminar Punto</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+    // --- CONFIGURACIÓN ---
+    // PEGA AQUÍ TU URL (La de la versión nueva "v2" o "v3")
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBrGYqr9V7Ps9VJAi767HWd8PxWYXZ4ejPlPZTiKM8OxGU2U3UXrGboK4nExquX70Z/exec"; 
+
+    // Variables Globales
+    let map;
+    let markersLayer = L.layerGroup();
+    let allData = [];
+    let userMarker;
+
+    // Colores y emojis
+    const catColors = {
+        'Comida': '#FF6B6B',     
+        'Turismo': '#4ECDC4',    
+        'Ocio': '#FFE66D',       
+        'Alojamiento': '#A06CD5',
+        'Otro': '#95A5A6'        
+    };
+    const catIcons = {
+        'Comida': '🍔', 'Turismo': '📸', 'Ocio': '🍹', 'Alojamiento': '🛏️', 'Otro': '📌'
+    };
+
+    // --- INICIALIZACIÓN ---
+    window.onload = function() {
+        initMap();
+        loadData();
+    };
+
+    function initMap() {
+        // 1. Crear el mapa
+        map = L.map('map', { zoomControl: false }).setView([40.416, -3.703], 6);
+
+        // 2. Cargar capa visual
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            maxZoom: 19
+        }).addTo(map);
+
+        // 3. Añadir capa de marcadores
+        markersLayer.addTo(map);
+
+        // 4. Evento: Clic en el mapa (Crear punto)
+        map.on('click', function(e) {
+            openModal('create', { lat: e.latlng.lat, lng: e.latlng.lng });
+        });
+
+        // 5. Eventos GPS (AHORA ESTÁN DENTRO DE INITMAP PARA EVITAR EL ERROR)
+        map.on('locationfound', function(e) {
+            if (userMarker) map.removeLayer(userMarker);
+            userMarker = L.circleMarker(e.latlng, {
+                radius: 8,
+                fillColor: "#3388ff",
+                color: "#fff",
+                weight: 2,
+                opacity: 1,
+                fillOpacity: 0.8
+            }).addTo(map);
+            userMarker.bindPopup("Estás aquí").openPopup();
+        });
+
+        map.on('locationerror', function(e) {
+            alert("No se pudo acceder a tu ubicación. Activa el GPS.");
+        });
+    }
+
+    // --- CARGA DE DATOS ---
+    async function loadData() {
+        try {
+            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const data = await response.json();
+            
+            // Verificamos si data es un array o viene dentro de data.data
+            allData = Array.isArray(data) ? data : [];
+            
+            renderMarkers(allData);
+            updateCityFilter(allData);
+            
+            const loader = document.getElementById('loader');
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
+            }
+        } catch (error) {
+            console.error("Error cargando datos:", error);
+            // No mostramos alerta para no molestar si solo es un retraso de red
+        }
+    }
+
+    function renderMarkers(data) {
+        markersLayer.clearLayers();
+        data.forEach(point => {
+            // Protección por si faltan datos
+            if (!point.lat || !point.lng) return;
+
+            const color = catColors[point.categoria] || catColors['Otro'];
+            const iconChar = catIcons[point.categoria] || catIcons['Otro'];
+
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="custom-marker" style="background-color: ${color}; width: 30px; height: 30px; font-size: 16px;">${iconChar}</div>`,
+                iconSize: [30, 30],
+                iconAnchor: [15, 15]
+            });
+
+            const marker = L.marker([point.lat, point.lng], { icon: customIcon });
+            
+            marker.bindPopup(`<b>${point.nombre}</b><br>${point.descripcion}`);
+            marker.on('click', (e) => {
+                L.DomEvent.stopPropagation(e);
+                openModal('edit', point);
+            });
+
+            markersLayer.addLayer(marker);
+        });
+    }
+
+    // --- UI Y FILTROS ---
+    function openModal(mode, data) {
+        const modal = document.getElementById('poiModal');
+        const title = document.getElementById('modalTitle');
+        const deleteBtn = document.getElementById('deleteBtn');
+        const saveBtn = document.getElementById('saveBtn');
+
+        document.getElementById('poiForm').reset();
+
+        if (mode === 'create') {
+            title.innerText = "Nuevo Punto";
+            document.getElementById('poiLat').value = data.lat;
+            document.getElementById('poiLng').value = data.lng;
+            deleteBtn.style.display = 'none';
+            saveBtn.innerText = "Guardar";
+            document.getElementById('poiId').value = ""; // Limpiar ID
+        } else {
+            title.innerText = "Editar Punto";
+            document.getElementById('poiId').value = data.id;
+            document.getElementById('poiLat').value = data.lat;
+            document.getElementById('poiLng').value = data.lng;
+            document.getElementById('poiName').value = data.nombre;
+            document.getElementById('poiDesc').value = data.descripcion;
+            document.getElementById('poiCat').value = data.categoria;
+            document.getElementById('poiCity').value = data.ciudad;
+            deleteBtn.style.display = 'block';
+            saveBtn.innerText = "Actualizar";
+        }
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('poiModal').style.display = 'none';
+    }
+
+    function updateCityFilter(data) {
+        const cities = [...new Set(data.map(item => item.ciudad))].sort();
+        const select = document.getElementById('cityFilter');
+        select.innerHTML = '<option value="all">🌍 Todas las ciudades</option>';
+        cities.forEach(city => {
+            if(city) {
+                const option = document.createElement('option');
+                option.value = city;
+                option.innerText = city;
+                select.appendChild(option);
+            }
+        });
+    }
+
+    const filterData = () => {
+    const city = document.getElementById('cityFilter').value;
+    const cat = document.getElementById('catFilter').value;
+
+    const filtered = allData.filter(item => {
+        const matchCity = city === 'all' || item.ciudad === city;
+        const matchCat = cat === 'all' || item.categoria === cat;
+        return matchCity && matchCat;
+    });
+
+    renderMarkers(filtered);
+
+    // Si se selecciona una ciudad específica y hay puntos, centrar el mapa
+    if (city !== 'all' && filtered.length > 0) {
+        // Calculamos el centro promedio de los puntos de esa ciudad
+        const lats = filtered.map(p => p.lat);
+        const lngs = filtered.map(p => p.lng);
+        const centerLat = lats.reduce((a, b) => a + b) / lats.length;
+        const centerLng = lngs.reduce((a, b) => a + b) / lngs.length;
+        
+        map.flyTo([centerLat, centerLng], 13, {
+            animate: true,
+            duration: 1.5
+        });
+    }
+};
+
+    document.getElementById('cityFilter').addEventListener('change', filterData);
+    document.getElementById('catFilter').addEventListener('change', filterData);
+
+    function locateUser() {
+    if (map) {
+        // Activamos la carga visual para que el usuario sepa que está buscando
+        map.locate({
+            setView: false, // Lo haremos manualmente para controlar el zoom
+            enableHighAccuracy: true
+        });
+    }
+}
+
+// Evento cuando el GPS encuentra al usuario
+map.on('locationfound', function(e) {
+    const radius = e.accuracy / 2;
+
+    if (userMarker) map.removeLayer(userMarker);
+
+    userMarker = L.circleMarker(e.latlng, {
+        radius: 9,
+        fillColor: "#3388ff",
+        color: "#fff",
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.9
+    }).addTo(map).bindPopup("Estás en un radio de " + radius.toFixed(0) + " metros").openPopup();
+
+    // Movimiento suave hacia el usuario
+    map.flyTo(e.latlng, 16, {
+        animate: true,
+        duration: 2
+    });
+});
+
+    // --- GUARDADO DE DATOS (VERSIÓN CORREGIDA) ---
+    document.getElementById('poiForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const id = document.getElementById('poiId').value;
+        const mode = id ? 'update' : 'create';
+        
+        const payload = {
+            action: mode,
+            id: id,
+            lat: document.getElementById('poiLat').value,
+            lng: document.getElementById('poiLng').value,
+            nombre: document.getElementById('poiName').value,
+            descripcion: document.getElementById('poiDesc').value,
+            categoria: document.getElementById('poiCat').value,
+            ciudad: document.getElementById('poiCity').value
+        };
+
+        sendToSheet(payload);
+    });
+
+    function deletePoint() {
+        if(!confirm("¿Seguro que quieres borrar este lugar?")) return;
+        const id = document.getElementById('poiId').value;
+        sendToSheet({ action: 'delete', id: id });
+    }
+
+    function sendToSheet(payload) {
+        const saveBtn = document.getElementById('saveBtn');
+        const originalText = saveBtn.innerText;
+        saveBtn.innerText = "Procesando...";
+        saveBtn.disabled = true;
+
+        // AQUÍ ESTÁ EL TRUCO DEL TEXT/PLAIN PARA EVITAR ERRORES
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(payload)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if(data.status === 'success') {
+                closeModal();
+                loadData(); // Recargar datos para ver el cambio
+                alert(mode === 'delete' ? "Punto eliminado" : "Guardado con éxito");
+            } else {
+                // A veces devuelve success pero sin status explicito en algunos casos raros
+                closeModal();
+                loadData();
+            }
+        })
+        .catch(error => {
+            console.warn("Error de red o CORS (a veces funciona igual):", error);
+            // Forzamos recarga por si acaso funcionó aunque diera error de red
+            closeModal();
+            setTimeout(loadData, 2000);
+        })
+        .finally(() => {
+            saveBtn.innerText = originalText;
+            saveBtn.disabled = false;
+        });
+    }
+</script>
 </body>
 </html>
