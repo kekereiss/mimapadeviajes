@@ -312,7 +312,7 @@
     <script>
     // --- CONFIGURACIÓN ---
     // PEGA AQUÍ TU URL (La de la versión nueva "v2" o "v3")
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpZYZikilj31HR69OOvqdsYaOQABD3JxlkE2KteKO0MfdGLiLSdNbo8t0N85FY70TYOA/exec"; 
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBrGYqr9V7Ps9VJAi767HWd8PxWYXZ4ejPlPZTiKM8OxGU2U3UXrGboK4nExquX70Z/exec"; 
 
     // Variables Globales
     let map;
@@ -448,7 +448,6 @@ if(loader) {
             saveBtn.innerText = "Guardar";
             document.getElementById('poiId').value = ""; // Limpiar ID
         } else {
-       if (mode === 'edit') {
             title.innerText = "Editar Punto";
             document.getElementById('poiId').value = data.id;
             document.getElementById('poiLat').value = data.lat;
