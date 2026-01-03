@@ -35,7 +35,7 @@
         #map { width: 100%; height: 100vh; z-index: 1; }
         .controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1000; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 8px; }
         .filter-box { background: white; padding: 8px 15px; border-radius: 20px; box-shadow: var(--shadow); }
-        select { border: none; width: 100%; font-family: inherit; font-weight: 600; outline: none; }
+        select, input.search-input { border: none; width: 100%; font-family: inherit; font-weight: 600; outline: none; background: transparent; }
 
         .gps-btn {
             position: fixed; bottom: 30px; right: 20px; width: 55px; height: 55px;
@@ -64,6 +64,9 @@
     </div>
 
     <div class="controls">
+        <div class="filter-box">
+            <input type="text" id="nameFilter" class="search-input" placeholder="🔍 Buscar por nombre...">
+        </div>
         <div class="filter-box"><select id="cityFilter"><option value="all">🌍 Todas las ciudades</option></select></div>
         <div class="filter-box">
             <select id="catFilter">
@@ -182,11 +185,25 @@
         function filterData() {
             const city = document.getElementById('cityFilter').value;
             const cat = document.getElementById('catFilter').value;
-            const filtered = allData.filter(p => (city === 'all' || p.ciudad === city) && (cat === 'all' || p.categoria === cat));
+            const nameSearch = document.getElementById('nameFilter').value.toLowerCase();
+            
+            const filtered = allData.filter(p => 
+                (city === 'all' || p.ciudad === city) && 
+                (cat === 'all' || p.categoria === cat) &&
+                (p.nombre.toLowerCase().includes(nameSearch))
+            );
+            
             renderMarkers(filtered);
-            if(city !== 'all' && filtered.length > 0) map.flyTo([filtered[0].lat, filtered[0].lng], 13);
+            
+            // Si hay un resultado específico por búsqueda de nombre, ir a él
+            if(nameSearch !== "" && filtered.length > 0) {
+                map.flyTo([filtered[0].lat, filtered[0].lng], 15);
+            } else if(city !== 'all' && filtered.length > 0) {
+                map.flyTo([filtered[0].lat, filtered[0].lng], 13);
+            }
         }
 
+        document.getElementById('nameFilter').oninput = filterData;
         document.getElementById('cityFilter').onchange = filterData;
         document.getElementById('catFilter').onchange = filterData;
 
